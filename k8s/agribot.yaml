@@ -17,6 +17,7 @@ spec:
       containers:
       - name: agribot
         image: ${DOCKER_IMAGE} # To be replaced by GitHub Actions
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8000
         env:
