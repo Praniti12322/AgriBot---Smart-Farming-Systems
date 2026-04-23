@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriBot Assistant - Smart Farming Systems</title>
+    <link rel="icon" type="image/png" href="/static/logo.png">
+    <link rel="stylesheet" href="/static/index.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background: #0f172a;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 1000px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 1rem;
+            position: relative;
+            min-height: 0; /* Important for flex overflow */
+        }
+
+        .assistant-card {
+            flex: 1;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 2rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            min-height: 0; /* Important for flex overflow */
+        }
+
+        .header-premium {
+            padding: 1.5rem 2rem;
+            background: rgba(16, 185, 129, 0.1);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+        }
+
+        .logo-glow {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: white;
+            padding: 2px;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+        }
+
+        .header-title h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-title p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .chat-window {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            scroll-behavior: smooth;
+        }
+
+        /* Custom Scrollbar */
+        .chat-window::-webkit-scrollbar {
+            width: 6px;
+        }
+        .chat-window::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .chat-window::-webkit-scrollbar-thumb {
+            background: rgba(16, 185, 129, 0.2);
+            border-radius: 10px;
+            transition: background 0.3s ease;
+        }
+        .chat-window::-webkit-scrollbar-thumb:hover {
+            background: rgba(16, 185, 129, 0.5);
+        }
+
+        .msg-container {
+            display: flex;
+            flex-direction: column;
+            max-width: 85%;
+        }
+
+        .msg-container.user {
+            align-self: flex-end;
+        }
+
+        .msg-container.bot {
+            align-self: flex-start;
+        }
+
+        .bubble {
+            padding: 1.25rem 1.5rem;
+            border-radius: 1.5rem;
+            font-size: 1rem;
+            line-height: 1.6;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .user .bubble {
+            background: var(--primary-gradient);
+            color: white;
+            border-bottom-right-radius: 0.5rem;
+            box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.3);
+        }
+
+        .bot .bubble {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: #e2e8f0;
+            border-bottom-left-radius: 0.5rem;
+        }
+
+        .urgency-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        .urgency-high { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .urgency-medium { background: rgba(245, 158, 11, 0.2); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .urgency-low { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
+
+        .location-label {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-bottom: 0.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .footer-premium {
+            padding: 2rem;
+            background: rgba(15, 23, 42, 0.4);
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .control-panel {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+            align-items: center;
+        }
+
+        .loc-input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        .loc-input-wrapper input {
+            padding-left: 2.5rem !important;
+            background: rgba(0, 0, 0, 0.2) !important;
+        }
+
+        .loc-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary-color);
+        }
+
+        .input-box-wrapper {
+            display: flex;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 1.5rem;
+            padding: 0.5rem;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .input-box-wrapper input {
+            border: none !important;
+            background: transparent !important;
+            padding: 0.75rem 1rem !important;
+            box-shadow: none !important;
+        }
+
+        .action-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 1rem;
+            border: none;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn:hover {
+            background: rgba(16, 185, 129, 0.2);
+            transform: scale(1.05);
+        }
+
+        .action-btn.active {
+            background: var(--primary-color);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+        }
+
+        .send-btn-premium {
+            padding: 0 1.5rem !important;
+            height: 45px;
+            width: auto !important;
+            border-radius: 1rem !important;
+            background: var(--primary-gradient) !important;
+        }
+
+        .preview-toast {
+            display: none;
+            position: absolute;
+            bottom: 120px;
+            left: 2rem;
+            right: 2rem;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--primary-color);
+            border-radius: 1rem;
+            padding: 0.75rem;
+            align-items: center;
+            gap: 1rem;
+            z-index: 100;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .preview-img-square {
+            width: 50px;
+            height: 50px;
+            border-radius: 0.5rem;
+            object-fit: cover;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="nav" style="top: 1rem; right: 1rem;">
+        <button onclick="window.location.href='/dashboard.html'" class="btn" style="padding:0.5rem 1.25rem;width:auto;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid var(--glass-border);">← Back</button>
+    </div>
+
+    <div class="main-wrapper">
+        <div class="assistant-card">
+            <div class="header-premium">
+                <div class="header-content">
+                    <img src="/static/agribot_logo.png" alt="AgriBot Logo" class="logo-glow">
+                    <div class="header-title">
+                        <h2>AgriBot Assistant</h2>
+                        <p>Smart Farming Systems • AI Diagnosis</p>
+                    </div>
+                </div>
+                <div class="status-indicator" style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: var(--primary-color);">
+                    <span style="width: 8px; height: 8px; background: var(--primary-color); border-radius: 50%; animation: pulse 2s infinite;"></span>
+                    Online
+                </div>
+            </div>
+
+            <div class="chat-window" id="chatWindow">
+                <div class="msg-container bot">
+                    <div class="bubble">
+                        👋 Welcome to **AgriBot**. I'm here to help you with any crop issues. You can describe the symptoms, upload a photo, or even use voice commands.
+                    </div>
+                </div>
+            </div>
+
+            <div class="preview-toast" id="previewToast">
+                <img id="imgPreview" class="preview-img-square">
+                <div style="flex: 1; font-size: 0.85rem; color: white;" id="fileInfo"></div>
+                <button class="action-btn" onclick="clearSelectedImage()" style="background: rgba(239, 68, 68, 0.2); color: #fca5a5;">✕</button>
+            </div>
+
+            <div class="footer-premium">
+                <div class="control-panel">
+                    <div class="loc-input-wrapper">
+                        <span class="loc-icon">📍</span>
+                        <input type="text" id="locInput" placeholder="Enter location (e.g. Punjab, India)">
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="action-btn" id="langEN" onclick="changeLanguage('en-US')" style="font-size: 0.8rem; font-weight: bold;">EN</button>
+                        <button class="action-btn" id="langHI" onclick="changeLanguage('hi-IN')" style="font-size: 0.8rem; font-weight: bold;">हि</button>
+                    </div>
+                </div>
+
+                <div class="input-box-wrapper">
+                    <input type="file" id="imgInput" accept="image/*" capture="environment" style="display:none" onchange="onFileSelected(this)">
+                    <button class="action-btn" onclick="document.getElementById('imgInput').click()" title="Attach Photo">📷</button>
+                    <button class="action-btn" id="voiceBtn" onclick="handleVoiceToggle()" title="Voice Input">🎤</button>
+                    <input type="text" id="userInput" placeholder="Describe your crop issue..." onkeypress="if(event.key==='Enter') doSend()">
+                    <button class="btn send-btn-premium" onclick="doSend()">Send ⚡</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const authHeader = { 'Authorization': `Bearer ${localStorage.getItem('token')}` };
+        if (!localStorage.getItem('token')) window.location.href = '/login.html';
+
+        let activeLang = 'en-US';
+        let micActive = false;
+        let base64Image = null;
+        const speechSvc = ('webkitSpeechRecognition' in window) ? new webkitSpeechRecognition() : null;
+
+        if (speechSvc) {
+            speechSvc.continuous = false;
+            speechSvc.onresult = (e) => {
+                document.getElementById('userInput').value = e.results[0][0].transcript;
+                stopRecording();
+            };
+            speechSvc.onend = () => stopRecording();
+        }
+
+        function changeLanguage(l) {
+            activeLang = l;
+            document.getElementById('langEN').classList.toggle('active', l === 'en-US');
+            document.getElementById('langHI').classList.toggle('active', l === 'hi-IN');
+        }
+        changeLanguage('en-US');
+
+        function handleVoiceToggle() { micActive ? stopRecording() : startRecording(); }
+        function startRecording() {
+            if (!speechSvc) return alert("Speech not supported");
+            micActive = true;
+            document.getElementById('voiceBtn').classList.add('active');
+            speechSvc.lang = activeLang;
+            speechSvc.start();
+        }
+        function stopRecording() {
+            micActive = false;
+            document.getElementById('voiceBtn').classList.remove('active');
+            if (speechSvc) speechSvc.stop();
+        }
+
+        function onFileSelected(input) {
+            const f = input.files[0];
+            if (!f) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                base64Image = e.target.result.split(',')[1];
+                document.getElementById('imgPreview').src = e.target.result;
+                document.getElementById('fileInfo').innerText = f.name;
+                document.getElementById('previewToast').style.display = 'flex';
+            };
+            reader.readAsDataURL(f);
+        }
+
+        function clearSelectedImage() {
+            base64Image = null;
+            document.getElementById('imgInput').value = '';
+            document.getElementById('previewToast').style.display = 'none';
+        }
+
+        function addMessage(type, content, urgency = null, image = null) {
+            const win = document.getElementById('chatWindow');
+            const container = document.createElement('div');
+            container.className = `msg-container ${type}`;
+            
+            if (urgency) {
+                const badge = document.createElement('div');
+                badge.className = `urgency-badge urgency-${urgency.toLowerCase()}`;
+                badge.innerHTML = `<span>⚠️</span> AI-Detected Urgency: ${urgency}`;
+                container.appendChild(badge);
+            }
+
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            bubble.innerHTML = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+            
+            if (image) {
+                const img = document.createElement('img');
+                img.src = `data:image/jpeg;base64,${image}`;
+                img.style.maxWidth = '100%';
+                img.style.borderRadius = '1rem';
+                img.style.marginTop = '1rem';
+                img.onload = () => win.scrollTop = win.scrollHeight;
+                bubble.appendChild(img);
+            }
+
+            container.appendChild(bubble);
+            win.appendChild(container);
+            
+            // Initial scroll and a delayed scroll for layout shifts
+            win.scrollTop = win.scrollHeight;
+            setTimeout(() => { win.scrollTop = win.scrollHeight; }, 50);
+        }
+
+        async function doSend() {
+            const input = document.getElementById('userInput');
+            const locInput = document.getElementById('locInput');
+            const msg = input.value.trim();
+            const loc = locInput.value.trim();
+
+            if (!msg && !base64Image) return;
+
+            addMessage('user', (loc ? `<div class="location-label">📍 ${loc}</div>` : '') + (msg || "Analyzing image..."), null, base64Image);
+            
+            const currentImg = base64Image;
+            input.value = '';
+            clearSelectedImage();
+
+            const typing = document.createElement('div');
+            typing.className = 'msg-container bot';
+            typing.innerHTML = '<div class="bubble" style="font-style: italic; opacity: 0.7;">AI is analyzing crop health...</div>';
+            document.getElementById('chatWindow').appendChild(typing);
+
+            try {
+                const r = await fetch('/assistant-chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', ...authHeader },
+                    body: JSON.stringify({ message: msg, location: loc || "Not specified", image: currentImg })
+                });
+                const d = await r.json();
+                typing.remove();
+
+                if (r.ok) {
+                    addMessage('bot', d.response, d.urgency);
+                } else if (r.status === 401) {
+                    addMessage('bot', "⚠️ **Session Expired**: Redirecting to login...");
+                    setTimeout(() => window.location.href = '/login.html', 2000);
+                } else {
+                    addMessage('bot', "⚠️ **System Error**: " + (d.detail || "Connection failed"));
+                }
+            } catch (e) {
+                typing.remove();
+                addMessage('bot', "⚠️ **Network Error**: Unable to reach the server.");
+            }
+        }
+    </script>
+</body>
+</html>

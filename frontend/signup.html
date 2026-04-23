@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - AgriBot</title>
+    <link rel="icon" type="image/png" href="/static/agribot_logo.png">
+    <link rel="stylesheet" href="/static/index.css">
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <img src="/static/agribot_logo.png" alt="AgriBot Logo" class="top-logo">
+            <h2 class="text-center mb-2" style="color: var(--primary-color); font-size: 1.2rem; font-weight: 700;">Smart Farming Systems</h2>
+            <h1 class="text-center mb-2">Create Account</h1>
+            <p class="text-center mb-6">Join the smartest agriculture learning platform.</p>
+            
+            <div id="signupAlert" class="alert"></div>
+
+            <form id="signupForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" required placeholder="Choose a username">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" required placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required placeholder="Create a password">
+                </div>
+                <button type="submit" class="btn" id="signupBtn">Sign Up</button>
+            </form>
+            
+            <p class="text-center mt-4">
+                Already have an account? <a href="/login.html" class="link">Log in</a>
+            </p>
+        </div>
+    </div>
+    <script src="/static/script.js"></script>
+</body>
+</html>

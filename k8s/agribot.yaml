@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agribot-deployment
+  labels:
+    app: agribot
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: agribot
+  template:
+    metadata:
+      labels:
+        app: agribot
+    spec:
+      containers:
+      - name: agribot
+        image: ${DOCKER_IMAGE} # To be replaced by GitHub Actions
+        ports:
+        - containerPort: 8000
+        env:
+        - name: GROQ_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: agribot-secrets
+              key: groq-api-key
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: agribot-secrets
+              key: secret-key
+        volumeMounts:
+        - name: agribot-data
+          mountPath: /app/data
+        - name: agribot-uploads
+          mountPath: /app/uploads
+      volumes:
+      - name: agribot-data
+        emptyDir: {} # Use PersistentVolumeClaim for production
+      - name: agribot-uploads
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agribot-service
+spec:
+  selector:
+    app: agribot
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+  type: LoadBalancer
