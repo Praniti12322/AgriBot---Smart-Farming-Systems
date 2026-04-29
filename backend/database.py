@@ -38,10 +38,12 @@ def get_db_connection():
     return conn
 
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    # bcrypt has a 72-byte max limit — truncate to avoid ValueError
+    return pwd_context.hash(password.encode("utf-8")[:72])
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    # bcrypt has a 72-byte max limit — truncate to avoid ValueError
+    return pwd_context.verify(plain_password.encode("utf-8")[:72], hashed_password)
 
 def create_user(username: str, email: str, password: str):
     conn = get_db_connection()
