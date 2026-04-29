@@ -28,15 +28,25 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v3
+    - name: Deploy to EC2 via SSH
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ubuntu
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          # Pull the latest image from Docker Hub
+          sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/agribot:latest
 
-    - name: Set up Kubeconfig
-      run: |
-        mkdir -p $HOME/.kube
-        echo "${{ secrets.KUBE_CONFIG }}" > $HOME/.kube/config
+          # Stop and remove the old container if running
+          sudo docker stop agribot-app || true
+          sudo docker rm agribot-app || true
 
-    - name: Deploy to Kubernetes
-      run: |
-        sed -i 's|${DOCKER_IMAGE}|${{ secrets.DOCKERHUB_USERNAME }}/agribot:latest|g' k8s/agribot.yaml
-        kubectl apply -f k8s/agribot.yaml
+          # Run the new container
+          sudo docker run -d \
+            --name agribot-app \
+            --restart always \
+            -p 80:8000 \
+            -e GROQ_API_KEY=${{ secrets.GROQ_API_KEY }} \
+            -e SECRET_KEY=${{ secrets.SECRET_KEY }} \
+            ${{ secrets.DOCKERHUB_USERNAME }}/agribot:latest
