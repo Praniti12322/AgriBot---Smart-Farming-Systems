@@ -38,9 +38,10 @@ jobs:
           # Pull the latest image from Docker Hub
           sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/agribot:latest
 
-          # Stop and remove the old container if running
-          sudo docker stop agribot-app || true
-          sudo docker rm agribot-app || true
+          # Stop ALL containers using port 80 (old and new)
+          sudo docker ps -q --filter "publish=80" | xargs -r sudo docker stop
+          sudo docker ps -aq --filter "name=agribot-app" | xargs -r sudo docker rm
+          sudo docker ps -aq --filter "name=musing_panini" | xargs -r sudo docker rm
 
           # Run the new container
           sudo docker run -d \
